@@ -1,48 +1,45 @@
 #include "main.h"
-
 /**
  * get_precision - Calculates the precision for printing
  * @format: Formatted string in which to print the arguments
- * @i: List of arguments to be printed.
- * @list: list of arguments.
+ * @i: Index of argument to be printed.
+ * @list: Variable argument list.
  *
  * Return: Precision.
  */
-int get_precision(const char *format, int i, ...) {
-    va_list args;
-    va_start(args, i);
+int get_precision(const char *format, int i, va_list list)
+{
+    int precision = -1; /* default precision */
 
-    // find the position of the ith argument in the argument list
-    int arg_pos = 1;
-    while (*format && arg_pos < i) {
-        if (*format == '%') {
-            // skip over any flags, width, and length modifiers
-            format++;
-            while (*format && !strchr("diouxXfFeEgGaAcspn%", *format))
-                format++;
-            if (*format == '\0')
-                break;
-            if (*format == '%' || *format == 'n') {
-                // ignore these conversion specifiers
-            } else {
-                arg_pos++;
+    /* Find the precision */
+    /* Loop through format string */
+    for (; *format != '\0'; format++)
+    {
+        /* Check for precision specifier */
+        if (*format == '.')
+        {
+            format++; /* Move past the period */
+
+            /* Check for optional precision value */
+            if (*format == '*')
+            {
+                /* Get precision from argument list */
+                precision = va_arg(list, int);
             }
-        } else {
-            format++;
+            else
+            {
+                /* Parse precision value from format string */
+                precision = 0;
+                while (*format >= '0' && *format <= '9')
+                {
+                    precision = precision * 10 + (*format - '0');
+                    format++;
+                }
+                format--; /* Move back one character */
+            }
         }
     }
 
-    // find the precision specifier (if any) for the ith argument
-    int precision = -1;
-    while (*format && strchr(".0123456789", *format)) {
-        if (*format == '.') {
-            precision = 0;
-        } else if (precision >= 0) {
-            precision = precision * 10 + (*format - '0');
-        }
-        format++;
-    }
-
-    va_end(args);
     return precision;
 }
+
